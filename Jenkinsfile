@@ -6,15 +6,6 @@ pipeline{
     }
 
     stages {
-        stage("Setup Permissions") {
-            steps {
-                sh '''
-                sudo chown -R jenkins:jenkins $APP_DIR
-                sudo chmod -R 755 $APP_DIR
-                '''
-            }
-        }
-
         stage("Install Dependencies") {
             steps {
                 // Install necessary dependencies like Node.js and npm on the EC2 instance if not already installed
@@ -34,8 +25,8 @@ pipeline{
             steps {
                 // Cleaning existing build and moving new files to the Nginx web directory
                 sh '''
-                    rm -rf $APP_DIR/*
-                    cp -r dist/aws_demo_angular/* $APP_DIR/
+                    sudo rm -rf $APP_DIR/*
+                    sudo cp -r dist/aws_demo_angular/* $APP_DIR/
                 '''
             }
         }

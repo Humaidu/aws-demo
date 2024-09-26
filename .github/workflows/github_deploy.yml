@@ -32,4 +32,10 @@ jobs:
 
     - name: Build App
       run: npm run build --if-present
+
+    - name: Deploy App to nginx
+      run: |
+        sudo rm -rf /var/www/angular-app/*
+        sudo cp -r dist/aws-angular-demo/* /var/www/angular-app/
+        sudo systemctl restart nginx
     

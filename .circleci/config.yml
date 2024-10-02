@@ -34,7 +34,12 @@ jobs:
       - run:
           name: Check artifacts stored in workspace
           command: 'ls /tmp/workspace/dist'
-      
+          
+      - run:
+          name: Add host to known_hosts
+          command: |
+            ssh-keyscan -H 54.198.231.3 >> ~/.ssh/known_hosts
+
       - run:
           name: Deploy Angular App to NGINX server
           command: |

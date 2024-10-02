@@ -31,9 +31,9 @@ jobs:
           fingerprints:
             - "SHA256:zFyFXOvbDcrNys/YHWJwuJwkIsLGoGj3jVUDg9swFic"
           
-      # - run:
-      #     name: found jenkins config
-      #     command: ':'
+      - run:
+          name: Check artifacts stored in workspace
+          command: 'ls /tmp/workspace'
 
 
 workflows:

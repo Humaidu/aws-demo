@@ -36,13 +36,18 @@ jobs:
           command: 'ls /tmp/workspace/dist'
       
       - run:
-          name: Deploy to EC2
+          name: Deploy Angular App to NGINX server
           command: |
             sudo apt-get update
             sudo apt-get install -y openssh-client
             echo "$EC2_PRIVATE_KEY" > key.pem
             chmod 600 key.pem
-            ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@ec2-52-87-64-57.compute-1.amazonaws.com "echo Connection Successful"
+            scp -o StrictHostKeyChecking=no -i key.pem -r /tmp/workspace/dist/aws_demo_angular/* ubuntu@ec2-52-87-64-57.compute-1.amazonaws.com:/var/www/angular-app
+
+      - run:
+          name: Restart Nginx server
+          command: |
+            ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@ec2-52-87-64-57.compute-1.amazonaws.com "sudo systemctl restart nginx"
             
       # scp -o StrictHostKeyChecking=no -i key.pem -r dist/your-angular-app/* ubuntu@your-ec2-public-dns:/var/www/angular-app
       # ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@your-ec2-public-dns "sudo systemctl restart nginx"

@@ -17,8 +17,7 @@ jobs:
           root: .
           paths:
             - dist/
-        
-
+            
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -26,10 +25,6 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp/workspace
-
-      # - add_ssh_keys:  # Add SSH keys to access your server
-      #     fingerprints:
-      #       - "SHA256:1niAPkqDLPZrSs0G8AX8zrUCrAz7nOJ7I3GSy9H2m2M"
           
       - run:
           name: Check artifacts stored in workspace
@@ -59,7 +54,6 @@ jobs:
           name: Restart Nginx server
           command: |
             ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@ec2-52-87-64-57.compute-1.amazonaws.com "sudo systemctl restart nginx"
-
 
 
 workflows:

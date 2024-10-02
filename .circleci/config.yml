@@ -27,23 +27,34 @@ jobs:
       - attach_workspace:
           at: /tmp/workspace
 
-      - add_ssh_keys:  # Add SSH keys to access your server
-          fingerprints:
-            - "SHA256:zFyFXOvbDcrNys/YHWJwuJwkIsLGoGj3jVUDg9swFic"
+      # - add_ssh_keys:  # Add SSH keys to access your server
+      #     fingerprints:
+      #       - "SHA256:1niAPkqDLPZrSs0G8AX8zrUCrAz7nOJ7I3GSy9H2m2M"
           
       - run:
           name: Check artifacts stored in workspace
           command: 'ls /tmp/workspace/dist'
-
+      
+      - run:
+          name: Deploy to EC2
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y openssh-client
+            echo "$EC2_PRIVATE_KEY" > key.pem
+            chmod 600 key.pem
+            ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@ec2-52-87-64-57.compute-1.amazonaws.com "echo Connection Successful"
+            
+      # scp -o StrictHostKeyChecking=no -i key.pem -r dist/your-angular-app/* ubuntu@your-ec2-public-dns:/var/www/angular-app
+      # ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@your-ec2-public-dns "sudo systemctl restart nginx"
       # - run:
       #     name: Add host to known_hosts
       #     command: |
       #       ssh-keyscan -H 54.198.231.3 >> ~/.ssh/known_hosts
 
-      - run:
-          name: Deploy Angular App to NGINX server
-          command: |
-            scp -o StrictHostKeyChecking=no -r /tmp/workspace/dist/aws_demo_angular/* ubuntu@54.198.231.3:/var/www/angular-app/
+      # - run:
+      #     name: Deploy Angular App to NGINX server
+      #     command: |
+      #       scp -o StrictHostKeyChecking=no -r /tmp/workspace/dist/aws_demo_angular/* ubuntu@54.198.231.3:/var/www/angular-app/
 
 
 workflows:

@@ -33,7 +33,12 @@ jobs:
           
       - run:
           name: Check artifacts stored in workspace
-          command: 'ls /tmp/workspace'
+          command: 'ls /tmp/workspace/dist'
+      
+      - run:
+          name: Deploy Angular App to NGINX server
+          command: |
+            scp -r /tmp/workspace/dist/aws_demo_angular/* ubuntu@54.198.231.3:/var/www/angular-app/
 
 
 workflows:

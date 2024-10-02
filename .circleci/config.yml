@@ -36,6 +36,17 @@ jobs:
           command: 'ls /tmp/workspace/dist'
       
       - run:
+          name: Create /var/www/angular-app
+          command: |
+            ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@ec2-52-87-64-57.compute-1.amazonaws.com "
+              if [ -d /var/www/angular-app ]; then
+                sudo rm -rf /var/www/angular-app/*;  
+              else
+                sudo mkdir -p /var/www/angular-app; 
+                sudo chmod 766 /var/www/angular-app;
+              fi"
+
+      - run:
           name: Deploy Angular App to NGINX server
           command: |
             sudo apt-get update
@@ -48,7 +59,15 @@ jobs:
           name: Restart Nginx server
           command: |
             ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@ec2-52-87-64-57.compute-1.amazonaws.com "sudo systemctl restart nginx"
-            
+
+       # SSH into the server, check if /var/www/angular-app exists, delete files if it does
+        # ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@your-ec2-public-dns "
+        #   if [ -d /var/www/angular-app ]; then
+        #     sudo rm -rf /var/www/angular-app/*;  # Delete all files in the directory
+        #   else
+        #     sudo mkdir -p /var/www/angular-app;  # Create the directory if it doesn't exist
+        #   fi"
+
       # scp -o StrictHostKeyChecking=no -i key.pem -r dist/your-angular-app/* ubuntu@your-ec2-public-dns:/var/www/angular-app
       # ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@your-ec2-public-dns "sudo systemctl restart nginx"
       # - run:

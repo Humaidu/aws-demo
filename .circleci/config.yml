@@ -24,23 +24,11 @@ jobs:
           path: ~/artifacts
           destination: node-build
 
-  # deploy:
-  #   # This is an example deploy job, not actually used by the workflow
-  #   docker:
-  #     - image: cimg/base:stable
-  #   steps:
-  #     # Replace this with steps to deploy to users
-  #     - run:
-  #         name: deploy
-  #         command: '#e.g. ./deploy.sh'
-  #     - run:
-  #         name: found jenkins config
-  #         command: ':'
 
 workflows:
   build-and-test:
     jobs:
-      - build-node:
+      - build-node
 
     # - deploy:
     #     requires:

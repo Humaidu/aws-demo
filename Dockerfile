@@ -15,11 +15,6 @@ RUN npm run build
 #Using multi-stage for nginx webserver
 FROM nginx:1.27.2-alpine-slim
 
-# Create pid file and adjust permissions
-RUN mkdir -p /var/run/nginx
-RUN touch /var/run/nginx.pid
-RUN chown -R nginx:nginx /var/run/nginx
-
 # Set the working directory inside the Nginx container
 WORKDIR /usr/share/nginx/html
 
@@ -33,5 +28,6 @@ COPY --from=build /app/dist/aws_demo_angular/ /usr/share/nginx/html
 EXPOSE 80
 
 # Restart Nginx after copying the new files
-CMD ["nginx", "-s", "reload"] && ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
+
 

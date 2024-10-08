@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 #Build Angular App
-RUN npm Build
+RUN npm build
 
 #Using multi-stage for nginx webserver
 FROM nginx:alpine

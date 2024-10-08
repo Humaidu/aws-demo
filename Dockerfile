@@ -19,7 +19,8 @@ FROM nginx:1.27.2-alpine-slim
 # Set the working directory inside the Nginx container
 WORKDIR /usr/share/nginx/html
 
-RUN chown -R nginx:nginx /var/run/nginx.pid
+#Ensure /var/run/nginx.pid Exists
+RUN mkdir -p /var/run/nginx && chown -R nginx:nginx /var/run/nginx
 
 # Remove existing files in /var/www/html (Nginx default serving directory)
 RUN rm -rf /usr/share/nginx/html/*

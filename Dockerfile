@@ -13,7 +13,8 @@ COPY . .
 RUN npm run build
 
 #Using multi-stage for nginx webserver
-FROM nginx:alpine
+FROM nginx:1.27.2-alpine-slim
+
 
 # Set the working directory inside the Nginx container
 WORKDIR /usr/share/nginx/html

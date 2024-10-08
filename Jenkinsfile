@@ -24,7 +24,7 @@ pipeline{
                     sh '''
                     docker stop angular-app || true
                     docker rm angular-app || true
-                    docker run -d --name angular-app -p 80:80 $DOCKER_IMAGE
+                    docker run -d --name angular-app -p 8081:80 $DOCKER_IMAGE
                     '''
 
                 }

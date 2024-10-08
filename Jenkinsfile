@@ -1,11 +1,12 @@
 pipeline{
-    agent {
-        docker {
-            image 'node:18'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-            // Mount Docker for Docker builds
-        }
-    }
+    agent any
+    // agent {
+    //     docker {
+    //         image 'node:18'
+    //         args '-v /var/run/docker.sock:/var/run/docker.sock'
+    //         // Mount Docker for Docker builds
+    //     }
+    // }
     environment {
         APP_DIR = '/var/www/html'
         DOCKER_IMAGE = 'angular-nginx:latest'

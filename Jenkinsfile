@@ -3,42 +3,34 @@ pipeline{
 
     environment {
         APP_DIR = '/var/www/html'
+        DOCKER_IMAGE = 'angular-nginx:latest'
     }
 
     stages {
-        stage("Install Dependencies") {
+        stage("Build Docker Image") {
             steps {
-                // Install necessary dependencies like Node.js and npm on the EC2 instance if not already installed
-                sh 'npm install'
+                script {
+                   // Build the docker image
+                   sh 'docker build -t $DOCKER_IMAGE .'
+                }
             }
         }
 
-        stage("Build Angular App") {
+        stage("Run Docker Container") {
             steps {
-                // Build the Angular App using npm
-                sh 'npm run build'
+                script {
+                    // Stop any existing container running the app
+                    // Run the Docker container with the built Angular app served by Nginx
+                    sh '''
+                    docker stop angular-app || true
+                    docker rm angular-app || true
+                    docker run -d --name angular-app -p 80:80 $DOCKER_IMAGE'
+                    '''
+
+                }
             }
 
-        }
-
-        stage("Deploy Angular App to Nginx") {
-            steps {
-                // Cleaning existing build and moving new files to the Nginx web directory
-                sh '''
-                    sudo rm -rf $APP_DIR/*
-                    sudo cp -r dist/aws_demo_angular/* $APP_DIR/
-                '''
-            }
-        }
-
-        stage("Restart Nginx Server") {
-            steps {
-                // Restarting nginx server
-                sh 'sudo systemctl restart nginx'
-            }
-        }
-
-        
+        } 
     }
 
     post {

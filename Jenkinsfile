@@ -15,6 +15,33 @@ pipeline{
                 }
             }
         }
+        
+        stage("Check and Push Docker Image to Docker Hub") {
+            steps {
+                script {
+                    // Use Jenkins credentials for Docker Hub login
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        // Log in to Docker Hub
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                        
+                        // Check if the image already exists on Docker Hub
+                        def exists = sh(script: 'curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/$DOCKER_USERNAME/angular-nginx/tags/latest', returnStdout: true).trim()
+
+                        if (exists == '200') {
+                            echo "Image exists on Docker Hub. Skipping push."
+                        } else {
+                            echo "Image does not exist. Proceeding to push."
+                            
+                            // Tag the Docker image
+                            sh 'docker tag angular-nginx:latest $DOCKER_USERNAME/angular-nginx:latest'
+
+                            // Push the Docker image to Docker Hub
+                            sh 'docker push $DOCKER_USERNAME/angular-nginx:latest'
+                        }
+                    }
+                }
+            }
+        }
 
         stage("Run Docker Container") {
             steps {

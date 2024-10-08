@@ -1,12 +1,6 @@
 pipeline{
     agent any
-    // agent {
-    //     docker {
-    //         image 'node:18'
-    //         args '-v /var/run/docker.sock:/var/run/docker.sock'
-    //         // Mount Docker for Docker builds
-    //     }
-    // }
+    
     environment {
         APP_DIR = '/var/www/html'
         DOCKER_IMAGE = 'angular-nginx:latest'
@@ -30,7 +24,8 @@ pipeline{
                     sh '''
                     docker stop angular-app || true
                     docker rm angular-app || true
-                    docker run -d --name angular-app -p 8081:80 $DOCKER_IMAGE
+                    docker run -d --name angular-app -p 8081:80 -v /var/run/nginx:/var/run/nginx $DOCKER_IMAGE
+                    docker ps
                     '''
 
                 }

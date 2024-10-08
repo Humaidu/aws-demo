@@ -15,12 +15,13 @@ RUN npm run build
 #Using multi-stage for nginx webserver
 FROM nginx:1.27.2-alpine-slim
 
+# Create pid file and adjust permissions
+RUN mkdir -p /var/run/nginx
+RUN touch /var/run/nginx.pid
+RUN chown -R nginx:nginx /var/run/nginx
 
 # Set the working directory inside the Nginx container
 WORKDIR /usr/share/nginx/html
-
-#Ensure /var/run/nginx.pid Exists
-RUN mkdir -p /var/run/nginx && chown -R nginx:nginx /var/run/nginx
 
 # Remove existing files in /var/www/html (Nginx default serving directory)
 RUN rm -rf /usr/share/nginx/html/*

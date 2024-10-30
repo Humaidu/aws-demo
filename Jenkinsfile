@@ -21,6 +21,10 @@ pipeline{
                 script {
                     // Use Jenkins credentials for Docker Hub login
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', dockerUsername: 'DOCKER_USERNAME', dockerPassword: 'DOCKER_PASSWORD')]){
+
+                    }
                         // Log in to Docker Hub
                         sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
                         
@@ -59,14 +63,57 @@ pipeline{
             }
 
         } 
+        
+        
+        stage('Run Ansible Playbook to Create EKS Cluster'){
+            steps{
+                script{
+                    sh 'ansible-playbook playbook/create_eks_cluster.yaml'
+                }
+            }
+
+        }
+
+        // stage("Install Nginx Ingress Contrroller"){
+        //     steps{
+        //         script{
+        //             sh 'ansible-playbook playbook/create_eks_cluster.yaml'
+        //         }
+        //     }
+
+        // }
+
+        stage("Deploy to EKS") {
+            steps {
+                script {
+                    // Update the deployment.yaml file to use the new image tag
+                    sh 'sed -i "s|image: your-dockerhub-username/angular-app:.*|image: your-dockerhub-username/angular-app:${env.BUILD_NUMBER}|" deployment.yaml'
+                    
+                    // Check if the deployment already exists
+                    def deploymentExists = sh(script: "kubectl get deployment angular-app --ignore-not-found", returnStatus: true) == 0
+
+                    if (!deploymentExists) {
+                        // First-time deployment: Apply deployment, service, and ingress
+                        echo "First-time deployment: Applying deployment, service, and ingress manifests"
+                        sh 'kubectl apply -f deployment.yaml'
+                        sh 'kubectl apply -f service.yaml'
+                        sh 'kubectl apply -f ingress.yaml'
+                    } else {
+                        // Subsequent updates: Apply only the deployment
+                        echo "Updating existing deployment"
+                        sh 'kubectl apply -f deployment.yaml'
+                    }
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo 'Deployment completed successfully!'
+            echo 'Deployment to EKS Successfully!'
         }
         failure {
-            echo 'Deployment failed!!!!'
+            echo 'Deployment to EKS Failed!!!!'
         }
     }
 

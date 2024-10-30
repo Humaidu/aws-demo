@@ -1,0 +1,47 @@
+---
+# nginx_ingress_install.yml
+
+- name: Download Helm binary
+  get_url:
+    url: https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
+    dest: /tmp/helm.tar.gz
+    mode: '0755'
+
+- name: Extract Helm binary
+  unarchive:
+    src: /tmp/helm.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Move Helm binary to /usr/local/bin
+  copy:
+    src: /tmp/linux-amd64/helm
+    dest: /usr/local/bin/helm
+    mode: '0755'
+
+- name: Verify Helm installation
+  command: helm version
+  register: helm_version
+  ignore_errors: yes
+
+- name: Show Helm version
+  debug:
+    msg: "Helm version: {{ helm_version.stdout }}"
+
+- name: Add Helm repo for NGINX Ingress
+  community.kubernetes.helm_repo:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+
+- name: Install NGINX Ingress Controller
+  community.kubernetes.helm:
+    name: nginx-ingress
+    chart_ref: ingress-nginx/ingress-nginx
+    namespace: ingress-nginx
+    create_namespace: true
+    release_name: nginx-ingress
+    values:
+      controller:
+        service:
+          type: LoadBalancer
+

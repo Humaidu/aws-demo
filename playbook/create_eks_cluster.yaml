@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  connection: local
+  roles:
+    - eks_cluster_role
+    - nginx_cluster_role

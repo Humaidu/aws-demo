@@ -1,0 +1,51 @@
+---
+- name: Create an EKS cluster
+  community.aws.aws_eks_cluster:
+    name: hash_cluster
+    version: 1.14
+    # role_arn: my_eks_role
+    # subnets:
+    #   - subnet-aaaa1111
+    security_groups:
+      - jenkins_nginx_sg
+
+  register: caller_facts
+
+# - name: Remove an EKS cluster
+#   community.aws.aws_eks_cluster:
+#     name: hash_cluster
+#     wait: yes
+#     state: absent
+
+- name: create nodegroup
+  community.aws.eks_nodegroup:
+    name: hash_nodegroup
+    state: present
+    cluster_name: hash_cluster
+    # subnets:
+    #   - subnet-qwerty123
+    #   - subnet-asdfg456
+    scaling_config:
+      min_size: 1
+      max_size: 2
+      desired_size: 1
+    disk_size: 20
+    instance_types: 't2.micro'
+    ami_type: 'ami-0866a3c8686eaeeba'
+    labels:
+      'teste': 'test'
+    taints:
+      - key: 'test'
+        value: 'test'
+        effect: 'NO_SCHEDULE'
+    capacity_type: 'ON_DEMAND'
+    remote_access:
+      ec2_ssh_key: "aws_demo.pem"
+
+# - name: Remove an EKS Nodegrop
+#   community.aws.eks_nodegroup:
+#     name: hash_nodegroup
+#     cluster_name: hash_cluster
+#     wait: true
+#     state: absent
+

@@ -65,7 +65,7 @@ pipeline{
         stage('Run Ansible Playbook to Create EKS Cluster'){
             steps{
                 script{
-                    sh 'ansible-playbook playbook/create_eks_cluster.yaml'
+                    sh 'ansible-playbook -i localhost, playbook/create_eks_cluster.yaml'
                 }
             }
 

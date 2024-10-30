@@ -3,4 +3,4 @@
   connection: local
   roles:
     - eks_cluster_role
-    - nginx_cluster_role
+    - nginx_controller_role

@@ -80,29 +80,29 @@ pipeline{
 
         // }
 
-        stage("Deploy to EKS") {
-            steps {
-                script {
-                    // Update the deployment.yaml file to use the new image tag
-                    sh 'sed -i "s|image: your-dockerhub-username/angular-app:.*|image: your-dockerhub-username/angular-app:${env.BUILD_NUMBER}|" deployment.yaml'
+        // stage("Deploy to EKS") {
+        //     steps {
+        //         script {
+        //             // Update the deployment.yaml file to use the new image tag
+        //             sh 'sed -i "s|image: $DOCKER_USERNAME/angular-app:.*|image: $DOCKER_USERNAME/angular-app:${env.BUILD_NUMBER}|" deployment.yaml'
                     
-                    // Check if the deployment already exists
-                    def deploymentExists = sh(script: "kubectl get deployment angular-app --ignore-not-found", returnStatus: true) == 0
+        //             // Check if the deployment already exists
+        //             def deploymentExists = sh(script: "kubectl get deployment angular-app --ignore-not-found", returnStatus: true) == 0
 
-                    if (!deploymentExists) {
-                        // First-time deployment: Apply deployment, service, and ingress
-                        echo "First-time deployment: Applying deployment, service, and ingress manifests"
-                        sh 'kubectl apply -f deployment.yaml'
-                        sh 'kubectl apply -f service.yaml'
-                        sh 'kubectl apply -f ingress.yaml'
-                    } else {
-                        // Subsequent updates: Apply only the deployment
-                        echo "Updating existing deployment"
-                        sh 'kubectl apply -f deployment.yaml'
-                    }
-                }
-            }
-        }
+        //             if (!deploymentExists) {
+        //                 // First-time deployment: Apply deployment, service, and ingress
+        //                 echo "First-time deployment: Applying deployment, service, and ingress manifests"
+        //                 sh 'kubectl apply -f deployment.yaml'
+        //                 sh 'kubectl apply -f service.yaml'
+        //                 sh 'kubectl apply -f ingress.yaml'
+        //             } else {
+        //                 // Subsequent updates: Apply only the deployment
+        //                 echo "Updating existing deployment"
+        //                 sh 'kubectl apply -f deployment.yaml'
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     post {

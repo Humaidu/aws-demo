@@ -1,47 +1,43 @@
 ---
 # nginx_ingress_install.yml
 
-- name: Download Helm binary
-  get_url:
-    url: https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
-    dest: /tmp/helm.tar.gz
-    mode: '0755'
-
-- name: Extract Helm binary
-  unarchive:
-    src: /tmp/helm.tar.gz
-    dest: /tmp/
-    remote_src: yes
-
-- name: Move Helm binary to /usr/local/bin
-  copy:
-    src: /tmp/linux-amd64/helm
-    dest: /usr/local/bin/helm
-    mode: '0755'
-
-- name: Verify Helm installation
-  command: helm version
-  register: helm_version
-  ignore_errors: yes
-
-- name: Show Helm version
-  debug:
-    msg: "Helm version: {{ helm_version.stdout }}"
-
-- name: Add Helm repo for NGINX Ingress
-  community.kubernetes.helm_repo:
+- name: Add NGINX Ingress Helm repository
+  community.general.helm_repository:
     name: ingress-nginx
     repo_url: https://kubernetes.github.io/ingress-nginx
+  register: nginx_repo
+  changed_when: nginx_repo.changed
+
+- name: Update Helm repositories
+  community.general.helm_repository:
+    name: ingress-nginx
+    update_cache: true
+  when: nginx_repo.changed
 
 - name: Install NGINX Ingress Controller
-  community.kubernetes.helm:
-    name: nginx-ingress
+  community.general.helm:
+    name: ingress-nginx
     chart_ref: ingress-nginx/ingress-nginx
+    release_name: nginx-ingress
     namespace: ingress-nginx
     create_namespace: true
-    release_name: nginx-ingress
+    state: present
     values:
       controller:
         service:
           type: LoadBalancer
+  register: nginx_install
+  changed_when: nginx_install.changed
 
+- name: Verify NGINX Ingress Controller installation
+  community.kubernetes.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    namespace: ingress-nginx
+    name: nginx-ingress-ingress-nginx-controller
+  register: nginx_controller
+  retries: 5
+  delay: 10
+  until: nginx_controller is defined and nginx_controller.resources | length > 0
+- debug:
+    msg: "NGINX Ingress Controller is installed and running."

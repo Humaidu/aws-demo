@@ -1,51 +1,39 @@
 ---
 - name: Create an EKS cluster
-  community.aws.aws_eks_cluster:
-    name: hash_cluster
-    version: 1.14
-    # role_arn: my_eks_role
-    # subnets:
-    #   - subnet-aaaa1111
-    security_groups:
-      - jenkins_nginx_sg
+  amazon.aws.eks_cluster:
+    name: "{{ cluster_name }}"
+    version: "{{ eks_version }}"
+    region: "{{ region }}"
+    node_groups:
+      - name: "{{ node_group_name }}"
+        instance_types: "{{ node_instance_type }}"
+        desired_capacity: "{{ desired_capacity }}"
+        min_size: "{{ min_size }}"
+        max_size: "{{ max_size }}"
+        key_name: "{{ key_name }}"
+        ssh_access: true
 
-  register: caller_facts
+- name: Update kubeconfig
+  shell: |
+    aws eks --region {{ region }} update-kubeconfig --name {{ cluster_name }}
+  args:
+    creates: "/home/{{ ansible_user }}/.kube/config"
+  when: "'{{ cluster_name }}@' not in lookup('file', '/home/{{ ansible_user }}/.kube/config')"
 
-# - name: Remove an EKS cluster
-#   community.aws.aws_eks_cluster:
-#     name: hash_cluster
-#     wait: yes
-#     state: absent
+- name: Confirm EKS cluster is up
+  community.kubernetes.k8s_info:
+    kubeconfig: /home/{{ ansible_user }}/.kube/config
+    kind: Node
 
-- name: create nodegroup
-  community.aws.eks_nodegroup:
-    name: hash_nodegroup
-    state: present
-    cluster_name: hash_cluster
-    # subnets:
-    #   - subnet-qwerty123
-    #   - subnet-asdfg456
-    scaling_config:
-      min_size: 1
-      max_size: 2
-      desired_size: 1
-    disk_size: 20
-    instance_types: 't2.micro'
-    ami_type: 'ami-0866a3c8686eaeeba'
-    labels:
-      'teste': 'test'
-    taints:
-      - key: 'test'
-        value: 'test'
-        effect: 'NO_SCHEDULE'
-    capacity_type: 'ON_DEMAND'
-    remote_access:
-      ec2_ssh_key: "aws_demo.pem"
+- name: Delete EKS cluster (conditional)
+  amazon.aws.eks_cluster:
+    name: "{{ cluster_name }}"
+    region: "{{ region }}"
+    state: absent
+  when: delete_cluster
+  register: delete_output
 
-# - name: Remove an EKS Nodegrop
-#   community.aws.eks_nodegroup:
-#     name: hash_nodegroup
-#     cluster_name: hash_cluster
-#     wait: true
-#     state: absent
-
+- name: Display deletion output if deleted
+  debug:
+    msg: "EKS Cluster deletion result: {{ delete_output }}"
+  when: delete_cluster

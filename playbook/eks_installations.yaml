@@ -1,0 +1,6 @@
+---
+# Install AWS CLI, kubectl, and eksctl
+- hosts: localhost
+  connection: local
+  roles:
+    - eks_installations_role

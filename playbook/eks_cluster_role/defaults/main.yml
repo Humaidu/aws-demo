@@ -1,2 +1,12 @@
 ---
 # defaults file for ansible_role
+cluster_name: hash-eks-cluster
+region: us-east-1
+node_group_name: hash-eks-node-group
+node_instance_type: t2.micro
+desired_capacity: 2
+min_size: 1
+max_size: 3
+eks_version: "1.30"
+key_name: "aws_demo.pem"
+delete_cluster: false

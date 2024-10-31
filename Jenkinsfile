@@ -61,7 +61,15 @@ pipeline{
 
         } 
         
-        
+         stage('Run Ansible Playbook to Install Eksctl, AWS cli and Kubectl'){
+            steps{
+                script{
+                    sh 'ansible-playbook -i localhost, playbook/eks_installations.yaml'
+                }
+            }
+
+        }
+
         stage('Run Ansible Playbook to Create EKS Cluster'){
             steps{
                 script{
@@ -71,14 +79,14 @@ pipeline{
 
         }
 
-        // stage("Install Nginx Ingress Contrroller"){
-        //     steps{
-        //         script{
-        //             sh 'ansible-playbook playbook/create_eks_cluster.yaml'
-        //         }
-        //     }
+        stage("Run Ansible Playbook to Install Nginx Ingress Contrroller"){
+            steps{
+                script{
+                    sh 'ansible-playbook playbook/nginx_controller.yaml'
+                }
+            }
 
-        // }
+        }
 
         // stage("Deploy to EKS") {
         //     steps {

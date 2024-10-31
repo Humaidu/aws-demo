@@ -1,0 +1,4 @@
+---
+# defaults file for ansible_role
+manifest_path: "/Users/humaidu/Desktop/code/Angular/aws_demo_app/aws_demo_angular/kubernetes"  
+docker_image: "humaidu/angular-nginx:latest" 

@@ -62,7 +62,7 @@ pipeline{
         } 
         
          stage('Run Ansible Playbook to Install Eksctl, AWS cli and Kubectl'){
-            steps{
+            steps {
                 script{
                     sh 'ansible-playbook -i localhost, playbook/eks_installations.yaml'
                 }
@@ -71,7 +71,7 @@ pipeline{
         }
 
         stage('Run Ansible Playbook to Create EKS Cluster'){
-            steps{
+            steps {
                 script{
                     sh 'ansible-playbook -i localhost, playbook/create_eks_cluster.yaml'
                 }
@@ -80,37 +80,21 @@ pipeline{
         }
 
         stage("Run Ansible Playbook to Install Nginx Ingress Contrroller"){
-            steps{
+            steps {
                 script{
-                    sh 'ansible-playbook playbook/nginx_controller.yaml'
+                    sh 'ansible-playbook -i localhost, playbook/nginx_controller.yaml'
                 }
             }
 
         }
 
-        // stage("Deploy to EKS") {
-        //     steps {
-        //         script {
-        //             // Update the deployment.yaml file to use the new image tag
-        //             sh 'sed -i "s|image: $DOCKER_USERNAME/angular-app:.*|image: $DOCKER_USERNAME/angular-app:${env.BUILD_NUMBER}|" deployment.yaml'
-                    
-        //             // Check if the deployment already exists
-        //             def deploymentExists = sh(script: "kubectl get deployment angular-app --ignore-not-found", returnStatus: true) == 0
-
-        //             if (!deploymentExists) {
-        //                 // First-time deployment: Apply deployment, service, and ingress
-        //                 echo "First-time deployment: Applying deployment, service, and ingress manifests"
-        //                 sh 'kubectl apply -f deployment.yaml'
-        //                 sh 'kubectl apply -f service.yaml'
-        //                 sh 'kubectl apply -f ingress.yaml'
-        //             } else {
-        //                 // Subsequent updates: Apply only the deployment
-        //                 echo "Updating existing deployment"
-        //                 sh 'kubectl apply -f deployment.yaml'
-        //             }
-        //         }
-        //     }
-        // }
+        stage("Run Ansible Playbook to Deploy Angular Image to EKS") {
+            steps {
+                script {
+                    sh 'ansible-playbook -i localhost, playbook/deploy_to_eks.yaml'
+                }
+            }
+        }
     }
 
     post {

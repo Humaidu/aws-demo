@@ -1,0 +1,28 @@
+---
+# deploying app to eks
+- name: Update Docker image in deployment.yaml
+  ansible.builtin.replace:
+    path: "{{ manifest_path }}/deployment.yaml"
+    regexp: 'image:\s.*'
+    replace: 'image: "{{ docker_image }}"'
+
+- name: Apply Kubernetes manifests
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('file', item) }}"
+  with_fileglob:
+    - "{{ manifest_path }}/*.yml"
+  register: apply_results
+
+- name: Show manifest application results
+  debug:
+    var: apply_results
+
+- name: Get the external IP of the NGINX Ingress
+  shell: kubectl get ingress nginx-ingress -n ingress-nginx -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+  register: nginx_ingress_ip
+
+- name: Set hostname if IP is not available
+  set_fact:
+    nginx_ingress_address: "{{ nginx_ingress_ip.stdout | default(nginx_ingress_hostname.stdout) }}"
+

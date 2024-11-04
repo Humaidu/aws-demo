@@ -27,16 +27,15 @@
   when: aws_cli_download is changed
 
 - name: Install kubectl
-  community.kubernetes.k8s_kubectl:
-    path: /usr/local/bin/kubectl
-    version: "latest"
-  register: kubectl_installed
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    dest: "/usr/local/bin/kubectl"
+    mode: '0755'
 
 - name: Verify kubectl installation
   ansible.builtin.command: "kubectl version --client"
   changed_when: false
-  ignore_errors: yes
-  when: kubectl_installed.changed
+  ignore_errors: true
   register: kubectl_version
 
 - name: Install eksctl

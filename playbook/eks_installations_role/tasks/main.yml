@@ -26,9 +26,14 @@
     creates: "/usr/local/bin/aws"
   when: aws_cli_download is changed
 
+- name: Get the latest stable kubectl release URL
+  ansible.builtin.command: "curl -L -s https://dl.k8s.io/release/stable.txt"
+  register: kubectl_version
+  changed_when: false
+
 - name: Install kubectl
   ansible.builtin.get_url:
-    url: "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    url: "https://dl.k8s.io/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
     dest: "/usr/local/bin/kubectl"
     mode: '0755'
 

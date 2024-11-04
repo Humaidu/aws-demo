@@ -85,13 +85,27 @@
       ignore_errors: true
       register: eksctl_version
 
-- name: Get the latest stable Helm installation script URL
-  ansible.builtin.command: "curl -L -s https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
-  register: helm_install_script
-  changed_when: false
+- name: Get the latest Helm release version
+  command: "curl -s -L https://api.github.com/repos/helm/helm/releases/latest | grep tag_name | cut -d '\"' -f 4"
+  register: helm_version
 
-- name: Install Helm
-  ansible.builtin.shell: "echo '{{ helm_install_script.stdout }}' | bash"
+- name: Set the Helm download URL
+  set_fact:
+    helm_url: "https://get.helm.sh/helm-{{ helm_version.stdout }}-{{ ansible_distribution | lower }}-amd64.tar.gz"
+
+- name: Download Helm
+  ansible.builtin.get_url:
+    url: "{{ helm_url }}"
+    dest: "/tmp/helm.tar.gz"
+
+- name: Extract Helm
+  ansible.builtin.unarchive:
+    src: /tmp/helm.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Move Helm to /usr/local/bin
+  ansible.builtin.command: "mv /tmp/linux-amd64/helm /usr/local/bin/helm"
   args:
     creates: "/usr/local/bin/helm"
 
@@ -99,7 +113,11 @@
   ansible.builtin.command: "helm version --short"
   changed_when: false
   ignore_errors: true
-  register: helm_version
+  register: helm_version_result
+
+- name: Display Helm version
+  ansible.builtin.debug:
+    msg: "Helm version: {{ helm_version_result.stdout }}"
 
 - name: Display installation results
   ansible.builtin.debug:

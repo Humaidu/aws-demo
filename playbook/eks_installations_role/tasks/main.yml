@@ -44,7 +44,8 @@
   register: kubectl_version
 
 - name: Get the latest eksctl release version
-  ansible.builtin.command: "curl -L -s https://api.github.com/repos/weaveworks/eksctl/releases/latest | grep 'tag_name' | cut -d '\"' -f 4"
+  ansible.builtin.shell: |
+    curl -L -s https://api.github.com/repos/weaveworks/eksctl/releases/latest | grep 'tag_name' | cut -d '"' -f 4
   register: eksctl_version
   changed_when: false
 

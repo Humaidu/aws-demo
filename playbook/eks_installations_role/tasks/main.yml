@@ -61,18 +61,19 @@
 - name: Verify eksctl installation
   ansible.builtin.command: "eksctl version"
   changed_when: false
-  ignore_errors: yes
+  ignore_errors: true
   register: eksctl_version
 
 - name: Install Helm
-  community.general.helm:
-    helm_path: /usr/local/bin/helm
-    state: present
+  ansible.builtin.command:
+    cmd: "curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash"
+  args:
+    creates: "/usr/local/bin/helm"
 
 - name: Verify Helm installation
   ansible.builtin.command: "helm version --short"
   changed_when: false
-  ignore_errors: yes
+  ignore_errors: true
   register: helm_version
 
 - name: Display installation results

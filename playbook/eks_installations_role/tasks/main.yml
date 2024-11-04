@@ -86,12 +86,18 @@
       register: eksctl_version
 
 - name: Get the latest Helm release version
-  command: "curl -s -L https://api.github.com/repos/helm/helm/releases/latest | grep tag_name | cut -d '\"' -f 4"
-  register: helm_version
+  uri:
+    url: "https://api.github.com/repos/helm/helm/releases/latest"
+    return_content: yes
+  register: helm_release
+
+- name: Set the Helm version
+  set_fact:
+    helm_version: "{{ helm_release.json.tag_name }}"
 
 - name: Set the Helm download URL
   set_fact:
-    helm_url: "https://get.helm.sh/helm-{{ helm_version.stdout }}-{{ ansible_distribution | lower }}-amd64.tar.gz"
+    helm_url: "https://get.helm.sh/helm-{{ helm_version }}-{{ ansible_distribution | lower }}-amd64.tar.gz"
 
 - name: Download Helm
   ansible.builtin.get_url:
@@ -118,6 +124,7 @@
 - name: Display Helm version
   ansible.builtin.debug:
     msg: "Helm version: {{ helm_version_result.stdout }}"
+
 
 - name: Display installation results
   ansible.builtin.debug:

@@ -95,14 +95,20 @@
   set_fact:
     helm_version: "{{ helm_release.json.tag_name }}"
 
+- name: Determine OS and architecture for Helm download
+  set_fact:
+    helm_os: "{{ ansible_os_family | lower }}"
+    helm_arch: "{{ ansible_architecture | lower }}"
+
 - name: Set the Helm download URL
   set_fact:
-    helm_url: "https://get.helm.sh/helm-{{ helm_version }}-{{ ansible_distribution | lower }}-amd64.tar.gz"
+    helm_url: "https://get.helm.sh/helm-{{ helm_version }}-{{ helm_os }}-{{ helm_arch }}.tar.gz"
 
 - name: Download Helm
   ansible.builtin.get_url:
     url: "{{ helm_url }}"
     dest: "/tmp/helm.tar.gz"
+  register: helm_download
 
 - name: Extract Helm
   ansible.builtin.unarchive:
@@ -124,7 +130,6 @@
 - name: Display Helm version
   ansible.builtin.debug:
     msg: "Helm version: {{ helm_version_result.stdout }}"
-
 
 - name: Display installation results
   ansible.builtin.debug:

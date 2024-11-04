@@ -43,25 +43,30 @@
   ignore_errors: true
   register: kubectl_version
 
-- name: Install eksctl
+- name: Get the latest eksctl release version
+  ansible.builtin.command: "curl -s https://api.github.com/repos/weaveworks/eksctl/releases/latest | grep 'tag_name' | cut -d '\"' -f 4"
+  register: eksctl_version
+  changed_when: false
+
+- name: Download eksctl
   ansible.builtin.get_url:
-    url: "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz"
+    url: "https://github.com/weaveworks/eksctl/releases/download/{{ eksctl_version.stdout }}/eksctl_$(uname -s)_amd64.tar.gz"
     dest: "/tmp/eksctl.tar.gz"
     mode: '0644'
-  register: eksctl_download
+  when: eksctl_version.stdout is defined
 
-- name: Extract and move eksctl
+- name: Extract and move eksctl to /usr/local/bin
   ansible.builtin.unarchive:
-    src: /tmp/eksctl.tar.gz
-    dest: /tmp/
+    src: "/tmp/eksctl.tar.gz"
+    dest: "/tmp/"
     remote_src: yes
-  when: eksctl_download is changed
+    creates: "/usr/local/bin/eksctl"
 
 - name: Move eksctl to /usr/local/bin
-  ansible.builtin.command: "mv /tmp/eksctl /usr/local/bin/"
+  ansible.builtin.command: "mv /tmp/eksctl /usr/local/bin/eksctl"
   args:
     creates: "/usr/local/bin/eksctl"
-  when: eksctl_download is changed
+
 
 - name: Verify eksctl installation
   ansible.builtin.command: "eksctl version"
@@ -69,9 +74,13 @@
   ignore_errors: true
   register: eksctl_version
 
+- name: Get the latest stable Helm installation script URL
+  ansible.builtin.command: "curl -L -s https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
+  register: helm_install_script
+  changed_when: false
+
 - name: Install Helm
-  ansible.builtin.command:
-    cmd: "curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash"
+  ansible.builtin.shell: "echo '{{ helm_install_script.stdout }}' | bash"
   args:
     creates: "/usr/local/bin/helm"
 

@@ -2,5 +2,6 @@
 #Create an EKS cluster
 - hosts: localhost
   connection: local
+  become: true
   roles:
     - eks_cluster_role

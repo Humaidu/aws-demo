@@ -49,31 +49,41 @@
   register: eksctl_version
   changed_when: false
 
-- name: Download eksctl
-  ansible.builtin.get_url:
-    url: "https://github.com/weaveworks/eksctl/releases/download/{{ eksctl_version.stdout }}/eksctl_$(uname -s)_amd64.tar.gz"
-    dest: "/tmp/eksctl.tar.gz"
-    mode: '0644'
-  when: eksctl_version.stdout is defined
+- name: Install eksctl
+  block:
+    - name: Get the current OS type
+      command: uname -s
+      register: os_type
 
-- name: Extract and move eksctl to /usr/local/bin
-  ansible.builtin.unarchive:
-    src: "/tmp/eksctl.tar.gz"
-    dest: "/tmp/"
-    remote_src: yes
-    creates: "/usr/local/bin/eksctl"
+    - name: Set the eksctl download URL
+      set_fact:
+        eksctl_url: "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_{{ os_type.stdout }}_amd64.tar.gz"
 
-- name: Move eksctl to /usr/local/bin
-  ansible.builtin.command: "mv /tmp/eksctl /usr/local/bin/eksctl"
-  args:
-    creates: "/usr/local/bin/eksctl"
+    - name: Download eksctl
+      ansible.builtin.get_url:
+        url: "{{ eksctl_url }}"
+        dest: "/tmp/eksctl.tar.gz"
+        mode: '0644'
+      register: eksctl_download
 
+    - name: Extract eksctl
+      ansible.builtin.unarchive:
+        src: /tmp/eksctl.tar.gz
+        dest: /tmp/
+        remote_src: yes
+      when: eksctl_download is changed
 
-- name: Verify eksctl installation
-  ansible.builtin.command: "eksctl version"
-  changed_when: false
-  ignore_errors: true
-  register: eksctl_version
+    - name: Move eksctl to /usr/local/bin
+      ansible.builtin.command: "mv /tmp/eksctl /usr/local/bin/"
+      args:
+        creates: "/usr/local/bin/eksctl"
+      when: eksctl_download is changed
+
+    - name: Verify eksctl installation
+      ansible.builtin.command: "eksctl version"
+      changed_when: false
+      ignore_errors: true
+      register: eksctl_version
 
 - name: Get the latest stable Helm installation script URL
   ansible.builtin.command: "curl -L -s https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"

@@ -4,3 +4,5 @@ dist
 .gitignore
 Dockerfile
 README.md
+*.log
+.DS_Store

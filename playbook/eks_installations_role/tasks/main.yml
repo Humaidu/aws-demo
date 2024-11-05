@@ -97,18 +97,27 @@
 
 - name: Determine OS and architecture for Helm download
   set_fact:
-    helm_os: "{{ ansible_os_family | lower }}"
-    helm_arch: "{{ ansible_architecture | lower }}"
+    helm_os: "{{ 'linux' if ansible_os_family | lower == 'debian' or ansible_os_family | lower == 'redhat' else 'darwin' }}"
+    helm_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
 
 - name: Set the Helm download URL
   set_fact:
     helm_url: "https://get.helm.sh/helm-{{ helm_version }}-{{ helm_os }}-{{ helm_arch }}.tar.gz"
 
+- name: Check if Helm download URL exists
+  uri:
+    url: "{{ helm_url }}"
+    method: HEAD
+    return_content: no
+  register: helm_url_check
+  failed_when: helm_url_check.status != 200
+  ignore_errors: true
+
 - name: Download Helm
   ansible.builtin.get_url:
     url: "{{ helm_url }}"
     dest: "/tmp/helm.tar.gz"
-  register: helm_download
+  when: helm_url_check.status == 200
 
 - name: Extract Helm
   ansible.builtin.unarchive:
@@ -117,19 +126,19 @@
     remote_src: yes
 
 - name: Move Helm to /usr/local/bin
-  ansible.builtin.command: "mv /tmp/linux-amd64/helm /usr/local/bin/helm"
+  ansible.builtin.command: "mv /tmp/{{ helm_os }}-{{ helm_arch }}/helm /usr/local/bin/helm"
   args:
     creates: "/usr/local/bin/helm"
 
 - name: Verify Helm installation
   ansible.builtin.command: "helm version --short"
   changed_when: false
-  ignore_errors: true
   register: helm_version_result
 
 - name: Display Helm version
   ansible.builtin.debug:
     msg: "Helm version: {{ helm_version_result.stdout }}"
+
 
 - name: Display installation results
   ansible.builtin.debug:

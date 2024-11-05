@@ -3,5 +3,8 @@
 - hosts: localhost
   connection: local
   become: true
+  collections:
+    - amazon.aws
+    - community.kubernetes 
   roles:
     - eks_cluster_role

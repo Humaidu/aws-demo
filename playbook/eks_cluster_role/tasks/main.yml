@@ -1,4 +1,8 @@
 ---
+- name: Install amazon.aws collection
+  ansible.builtin.command:
+    cmd: ansible-galaxy collection install amazon.aws
+
 - name: Create an EKS cluster
   amazon.aws.eks_cluster:
     name: "{{ cluster_name }}"
@@ -19,6 +23,10 @@
   args:
     creates: "/home/{{ ansible_user }}/.kube/config"
   when: "'{{ cluster_name }}@' not in lookup('file', '/home/{{ ansible_user }}/.kube/config')"
+
+- name: Install community.kubernetes collection
+  ansible.builtin.command:
+    cmd: ansible-galaxy collection install community.kubernetes
 
 - name: Confirm EKS cluster is up
   community.kubernetes.k8s_info:

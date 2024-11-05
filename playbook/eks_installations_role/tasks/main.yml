@@ -61,12 +61,12 @@
 
 - name: Verify Helm installation
   command: "helm version --short"
-  register: helm_version_result
+  register: helm_version
   changed_when: false
 
 - name: Display Helm version
   debug:
-    msg: "Helm version installed: {{ helm_version_result.stdout }}"
+    msg: "Helm version installed: {{ helm_version.stdout }}"
 
 - name: Determine the latest eksctl version
   uri:
@@ -86,12 +86,12 @@
 
 - name: Verify eksctl installation
   command: "eksctl version"
-  register: eksctl_version_result
+  register: eksctl_version
   changed_when: false
 
 - name: Display eksctl version
   debug:
-    msg: "eksctl version installed: {{ eksctl_version_result.stdout }}"
+    msg: "eksctl version installed: {{ eksctl_version.stdout }}"
 
 - name: Display installation results
   ansible.builtin.debug:

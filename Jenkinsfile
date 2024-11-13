@@ -93,7 +93,7 @@ pipeline{
 
         }
 
-        stage("Run Ansible Playbook to Install Nginx Ingress Contrroller"){
+        stage("Run Ansible Playbook to Install Nginx Ingress Controller"){
             steps {
                 script{
                     sh 'ansible-playbook -i localhost, playbook/nginx_controller.yaml'

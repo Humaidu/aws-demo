@@ -4,6 +4,10 @@ pipeline{
     environment {
         APP_DIR = '/var/www/html'
         DOCKER_IMAGE = 'angular-nginx:latest'
+        TF_WORKING_DIR = './terraform-eks'
+        AWS_REGION = 'us-east-1'
+        EKS_CLUSTER_NAME = 'hash-cluster'
+
     }
 
     stages {
@@ -61,7 +65,7 @@ pipeline{
 
         } 
         
-         stage('Run Ansible Playbook to Install Eksctl, AWS cli and Kubectl'){
+         stage('Run Ansible Playbook to Install AWS cli, Kubectl and Helm'){
             steps {
                 script{
                     sh 'ansible-playbook -i localhost, playbook/eks_installations.yaml'
@@ -70,10 +74,20 @@ pipeline{
 
         }
 
-        stage('Run Ansible Playbook to Create EKS Cluster'){
+        stage('Create or Update EKS Cluster with Terraform'){
             steps {
-                script{
-                    sh 'ansible-playbook -i localhost, playbook/create_eks_cluster.yaml'
+                dir(TF_WORKING_DIR) {
+                    script {
+                        // Initialize Terraform
+                        // Terraform plan to show the changes
+                        // Apply Terraform configuration
+                        sh '''
+                           terraform init
+                           terraform plan -out=tfplan
+                           terraform apply -auto-approve tfplan
+
+                        '''
+                    }
                 }
             }
 
@@ -91,7 +105,12 @@ pipeline{
         stage("Run Ansible Playbook to Deploy Angular Image to EKS") {
             steps {
                 script {
-                    sh 'ansible-playbook -i localhost, playbook/deploy_to_eks.yaml'
+                    sh '''
+                    aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
+
+                    ansible-playbook -i localhost, playbook/deploy_to_eks.yaml
+
+                    '''
                 }
             }
         }

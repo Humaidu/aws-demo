@@ -68,30 +68,30 @@
   debug:
     msg: "Helm version installed: {{ helm_version.stdout }}"
 
-- name: Determine the latest eksctl version
-  uri:
-    url: "https://api.github.com/repos/weaveworks/eksctl/releases/latest"
-    return_content: yes
-  register: eksctl_release
+# - name: Determine the latest eksctl version
+#   uri:
+#     url: "https://api.github.com/repos/weaveworks/eksctl/releases/latest"
+#     return_content: yes
+#   register: eksctl_release
 
-- name: Set eksctl download URL
-  set_fact:
-    eksctl_url: "https://github.com/weaveworks/eksctl/releases/download/{{ eksctl_release.json.tag_name }}/eksctl_Linux_amd64.tar.gz"
+# - name: Set eksctl download URL
+#   set_fact:
+#     eksctl_url: "https://github.com/weaveworks/eksctl/releases/download/{{ eksctl_release.json.tag_name }}/eksctl_Linux_amd64.tar.gz"
 
-- name: Install eksctl
-  shell: |
-    curl -L {{ eksctl_url }} | tar -xz -C /usr/local/bin
-  args:
-    creates: /usr/local/bin/eksctl
+# - name: Install eksctl
+#   shell: |
+#     curl -L {{ eksctl_url }} | tar -xz -C /usr/local/bin
+#   args:
+#     creates: /usr/local/bin/eksctl
 
-- name: Verify eksctl installation
-  command: "eksctl version"
-  register: eksctl_version
-  changed_when: false
+# - name: Verify eksctl installation
+#   command: "eksctl version"
+#   register: eksctl_version
+#   changed_when: false
 
-- name: Display eksctl version
-  debug:
-    msg: "eksctl version installed: {{ eksctl_version.stdout }}"
+# - name: Display eksctl version
+#   debug:
+#     msg: "eksctl version installed: {{ eksctl_version.stdout }}"
 
 - name: Display installation results
   ansible.builtin.debug:

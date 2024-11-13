@@ -98,7 +98,6 @@
     msg:
       - "AWS CLI installed: {{ aws_cli_download.changed }}"
       - "kubectl version: {{ kubectl_version.stdout }}"
-      - "eksctl version: {{ eksctl_version.stdout }}"
       - "Helm version: {{ helm_version.stdout }}"
 
 
